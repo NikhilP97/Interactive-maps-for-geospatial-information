@@ -13,6 +13,7 @@ import de.fhpotsdam.unfolding.marker.Marker;
 import de.fhpotsdam.unfolding.marker.MultiMarker;
 import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.providers.MBTilesMapProvider;
+import de.fhpotsdam.unfolding.providers.Microsoft;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import parsing.ParseFeed;
 import processing.core.PApplet;
@@ -36,6 +37,8 @@ public class EarthquakeCityMap extends PApplet {
 
 	// IF YOU ARE WORKING OFFILINE, change the value of this variable to true
 	private static final boolean offline = false;
+	
+	private static final int TRI_SIZE = 5;
 	
 	/** This is where to find the local tiles, for working without an Internet connection */
 	public static String mbTilesString = "blankLight-1-3.mbtiles";
@@ -68,7 +71,7 @@ public class EarthquakeCityMap extends PApplet {
 		    earthquakesURL = "2.5_week.atom";  // The same feed, but saved August 7, 2015
 		}
 		else {
-			map = new UnfoldingMap(this, 200, 50, 650, 600, new Google.GoogleMapProvider());
+			map = new UnfoldingMap(this, 200, 50, 650, 600, new Microsoft.AerialProvider());
 			// IF YOU WANT TO TEST WITH A LOCAL FILE, uncomment the next line
 		    //earthquakesURL = "2.5_week.atom";
 		}
@@ -76,11 +79,11 @@ public class EarthquakeCityMap extends PApplet {
 		
 		// FOR TESTING: Set earthquakesURL to be one of the testing files by uncommenting
 		// one of the lines below.  This will work whether you are online or offline
-		//earthquakesURL = "test1.atom";
-		//earthquakesURL = "test2.atom";
+//		earthquakesURL = "test1.atom";
+//		earthquakesURL = "test2.atom";
 		
 		// WHEN TAKING THIS QUIZ: Uncomment the next line
-		//earthquakesURL = "quiz1.atom";
+//		earthquakesURL = "quiz1.atom";
 		
 		
 		// (2) Reading in earthquake data and geometric properties
@@ -142,11 +145,15 @@ public class EarthquakeCityMap extends PApplet {
 		text("Earthquake Key", 50, 75);
 		
 		fill(color(255, 0, 0));
-		ellipse(50, 125, 15, 15);
+		triangle(50-TRI_SIZE, 125+TRI_SIZE, 50, 125-TRI_SIZE, 50+TRI_SIZE, 125+TRI_SIZE);
+		
+		
+		fill(color(255, 0, 0));
+		ellipse(50, 225, 15, 15);
 		fill(color(255, 255, 0));
-		ellipse(50, 175, 10, 10);
+		ellipse(50, 255, 10, 10);
 		fill(color(0, 0, 255));
-		ellipse(50, 225, 5, 5);
+		ellipse(50, 275, 5, 5);
 		
 		fill(0, 0, 0);
 		text("5.0+ Magnitude", 75, 125);
@@ -170,6 +177,8 @@ public class EarthquakeCityMap extends PApplet {
 		// If isInCountry ever returns true, isLand should return true.
 		for (Marker m : countryMarkers) {
 			// TODO: Finish this method using the helper method isInCountry
+			boolean tempVar = isInCountry(earthquake, m);
+			if (tempVar) return tempVar;
 			
 		}
 		
@@ -210,8 +219,35 @@ public class EarthquakeCityMap extends PApplet {
 		//  * If you know your Marker, m, is a LandQuakeMarker, then it has a "country" 
 		//      property set.  You can get the country with:
 		//        String country = (String)m.getProperty("country");
+		int countryQuakes = 0;
+		int oceanQuakes = 0;
 		
+		for(Marker m : countryMarkers) {
+			countryQuakes = 0;
+			String nameOfCountryMakrker = (String)m.getProperty("name");
+			for(Marker m1 : quakeMarkers) {
+				EarthquakeMarker em = (EarthquakeMarker)m1;
+				if (em.isOnLand) {
+					String nameOfLandQuake = (String)em.getProperty("country");
+					if(nameOfLandQuake.equals(nameOfCountryMakrker)) {
+						countryQuakes++;
+					}
+				}
+				
+			}
+			System.out.println(nameOfCountryMakrker+" : "+countryQuakes);
+			
+		}
 		
+		for(Marker m2 : quakeMarkers) {
+			EarthquakeMarker em1 = (EarthquakeMarker)m2;
+			if (!em1.isOnLand) {
+				oceanQuakes++;
+			}
+		}
+		System.out.println("OCEAN QUAKES : "+oceanQuakes);
+		
+			
 	}
 	
 	

@@ -15,6 +15,7 @@ import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.providers.MBTilesMapProvider;
 import de.fhpotsdam.unfolding.providers.Microsoft;
 import de.fhpotsdam.unfolding.utils.MapUtils;
+import module5.CityMarker;
 import parsing.ParseFeed;
 import processing.core.PApplet;
 
@@ -137,28 +138,62 @@ public class EarthquakeCityMap extends PApplet {
 	private void addKey() {	
 		// Remember you can use Processing's graphics methods here
 		fill(255, 250, 240);
-		rect(25, 50, 150, 250);
+		
+		int xbase = 25;
+		int ybase = 50;
+		
+		rect(xbase, ybase, 150, 250);
 		
 		fill(0);
 		textAlign(LEFT, CENTER);
 		textSize(12);
-		text("Earthquake Key", 50, 75);
+		text("Earthquake Key", xbase+25, ybase+25);
 		
-		fill(color(255, 0, 0));
-		triangle(50-TRI_SIZE, 125+TRI_SIZE, 50, 125-TRI_SIZE, 50+TRI_SIZE, 125+TRI_SIZE);
-		
-		
-		fill(color(255, 0, 0));
-		ellipse(50, 225, 15, 15);
-		fill(color(255, 255, 0));
-		ellipse(50, 255, 10, 10);
-		fill(color(0, 0, 255));
-		ellipse(50, 275, 5, 5);
-		
+		fill(150, 30, 30);
+		int tri_xbase = xbase + 35;
+		int tri_ybase = ybase + 50;
+		triangle(tri_xbase, tri_ybase-CityMarker.TRI_SIZE, tri_xbase-CityMarker.TRI_SIZE, 
+				tri_ybase+CityMarker.TRI_SIZE, tri_xbase+CityMarker.TRI_SIZE, 
+				tri_ybase+CityMarker.TRI_SIZE);
+
 		fill(0, 0, 0);
-		text("5.0+ Magnitude", 75, 125);
-		text("4.0+ Magnitude", 75, 175);
-		text("Below 4.0", 75, 225);
+		textAlign(LEFT, CENTER);
+		text("City Marker", tri_xbase + 15, tri_ybase);
+		
+		text("Land Quake", xbase+50, ybase+70);
+		text("Ocean Quake", xbase+50, ybase+90);
+	
+		
+		fill(255, 255, 255);
+		ellipse(xbase+35, 
+				ybase+70, 
+				10, 
+				10);
+		rect(xbase+35-5, ybase+90-5, 10, 10);
+		
+		fill(color(255, 255, 0));
+		ellipse(xbase+35, ybase+140, 12, 12);
+		fill(color(0, 0, 255));
+		ellipse(xbase+35, ybase+160, 12, 12);
+		fill(color(255, 0, 0));
+		ellipse(xbase+35, ybase+180, 12, 12);
+		
+		textAlign(LEFT, CENTER);
+		fill(0, 0, 0);
+		text("Shallow", xbase+50, ybase+140);
+		text("Intermediate", xbase+50, ybase+160);
+		text("Deep", xbase+50, ybase+180);
+
+		text("Past Day", xbase+50, ybase+200);
+		
+		fill(255, 255, 255);
+		int centerx = xbase+35;
+		int centery = ybase+200;
+		ellipse(centerx, centery, 12, 12);
+
+		strokeWeight(2);
+		line(centerx-8, centery-8, centerx+8, centery+8);
+		line(centerx-8, centery+8, centerx+8, centery-8);
 	}
 
 	

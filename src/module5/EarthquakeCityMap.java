@@ -13,6 +13,7 @@ import de.fhpotsdam.unfolding.marker.Marker;
 import de.fhpotsdam.unfolding.marker.MultiMarker;
 import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.providers.MBTilesMapProvider;
+import de.fhpotsdam.unfolding.providers.Microsoft;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import parsing.ParseFeed;
 import processing.core.PApplet;
@@ -70,7 +71,7 @@ public class EarthquakeCityMap extends PApplet {
 		    earthquakesURL = "2.5_week.atom";  // The same feed, but saved August 7, 2015
 		}
 		else {
-			map = new UnfoldingMap(this, 200, 50, 650, 600, new Google.GoogleMapProvider());
+			map = new UnfoldingMap(this, 200, 50, 650, 600, new Microsoft.RoadProvider());
 			// IF YOU WANT TO TEST WITH A LOCAL FILE, uncomment the next line
 		    //earthquakesURL = "2.5_week.atom";
 		}
@@ -135,8 +136,9 @@ public class EarthquakeCityMap extends PApplet {
 			lastSelected = null;
 		
 		}
-		selectMarkerIfHover(quakeMarkers);
 		selectMarkerIfHover(cityMarkers);
+		selectMarkerIfHover(quakeMarkers);
+		
 	}
 	
 	// If there is a marker under the cursor, and lastSelected is null 
@@ -146,6 +148,26 @@ public class EarthquakeCityMap extends PApplet {
 	private void selectMarkerIfHover(List<Marker> markers)
 	{
 		// TODO: Implement this method
+		
+		if (lastSelected != null) {
+			return;
+		}
+		
+			for(Marker m : markers) {
+				CommonMarker cm = (CommonMarker) m;
+				if(cm.isInside(map,  mouseX, mouseY)) {
+//					lastSelected.setSelected(true);
+//					m.setSelected(true);
+					lastSelected = cm;
+					cm.setSelected(true);
+					
+//					m = lastSelected;
+					return;
+				}
+				
+			}
+		
+		
 	}
 	
 	/** The event handler for mouse clicks
@@ -159,6 +181,141 @@ public class EarthquakeCityMap extends PApplet {
 		// TODO: Implement this method
 		// Hint: You probably want a helper method or two to keep this code
 		// from getting too long/disorganized
+		if (lastClicked != null) {
+			unhideMarkers();
+			lastClicked = null;
+		}
+		else if (lastClicked == null) 
+		{
+			checkIfEarthquakeClicked();
+			if (lastClicked == null) {
+				checkIfCityclicked();
+			}
+		}
+		
+		
+	}
+	
+	private void checkIfCityclicked() {
+		// TODO Auto-generated method stub
+		for(Marker marker : cityMarkers) {
+			if(!marker.isHidden() && marker.isInside(map, mouseX, mouseY)) {
+				lastClicked = (CommonMarker) marker;
+				
+				for(Marker m1 : cityMarkers) {
+					if(m1 != lastClicked) {
+						m1.setHidden(true);
+						
+					}
+				}
+				for(Marker m1 : quakeMarkers) {
+					EarthquakeMarker quakeMarker = (EarthquakeMarker)m1;
+					if(quakeMarker.getDistanceTo(marker.getLocation()) > quakeMarker.threatCircle()) {
+						m1.setHidden(true);
+					}
+				}
+				return;
+				
+			}
+		}
+	}
+
+
+	private void checkIfEarthquakeClicked() {
+		// TODO Auto-generated method stub
+		for(Marker m : quakeMarkers) {
+			EarthquakeMarker marker = (EarthquakeMarker)m;
+			if(!marker.isHidden() && marker.isInside(map, mouseX, mouseY)) {
+				lastClicked = marker;
+				
+				for(Marker m1 : quakeMarkers) {
+					if(m1 != lastClicked) {
+						m1.setHidden(true);
+						
+					}
+				}
+				for(Marker m1 : cityMarkers) {
+					if(m1.getDistanceTo(marker.getLocation()) > marker.threatCircle()) {
+						m1.setHidden(true);
+					}
+				}
+				return;
+				
+			}
+		}
+	}
+
+
+	private void makeMarkersHidden(List<Marker> markers, Marker foundMarker) {
+		for(Marker m : markers) {
+			m.setHidden(true);
+			if(m.equals(foundMarker)) {
+				foundMarker.setHidden(false);
+			}
+		}
+		if (quakeMarkers.contains(foundMarker)) {
+			findCitiesAffected(foundMarker);
+		}
+		else {
+			findEarthquakesInClickedCity(foundMarker);
+		}
+		
+	}
+	
+	private void findClickedMarker(List<Marker> markers) {
+		Marker tempObj = null;
+		for(Marker m : markers) {
+			boolean insideMarkerThen = m.isInside(map, mouseX, mouseY);
+			if(insideMarkerThen) {
+				lastClicked = (CommonMarker) m;
+				tempObj = m;
+				makeMarkersHidden(markers, tempObj);
+			}
+
+		}
+		
+		
+	}
+	
+	private void findCitiesAffected(Marker ma) {
+		if(ma != null) {
+			double earthQuakeRadius = ((EarthquakeMarker) ma).threatCircle();
+			for(Marker maSon : cityMarkers) {
+				Location desti = maSon.getLocation();
+				double checkDist = ma.getDistanceTo(desti);
+				maSon.setHidden(true);
+				if(checkDist <= earthQuakeRadius) {
+					maSon.setHidden(false);
+				}
+				
+			}
+		}
+		
+	}
+	
+	private void findCitiesAffected(Location desti) {
+		
+			for(Marker maSon : quakeMarkers) {
+				double earthQuakeRadius = ((EarthquakeMarker) maSon).threatCircle();
+				double checkDist = maSon.getDistanceTo(desti);
+				maSon.setHidden(true);
+				if(checkDist <= earthQuakeRadius) {
+					maSon.setHidden(false);
+				}
+				
+			}
+		
+		
+	}
+	
+	private void findEarthquakesInClickedCity(Marker ma) {
+		if (ma != null) {
+			
+			Location desti = ma.getLocation();
+			findCitiesAffected(desti);	
+		}
+		
+
 	}
 	
 	

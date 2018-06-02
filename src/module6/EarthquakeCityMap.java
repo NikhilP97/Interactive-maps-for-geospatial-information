@@ -62,13 +62,33 @@ public class EarthquakeCityMap extends PApplet {
 	private List<Marker> quakeMarkers;
 	
 	private List<EarthquakeMarker> earthquakeMarkers;
+	private List<LandQuakeMarker> landquakeMarkers;
+	private List<OceanQuakeMarker> oceanquakeMarkers;
 
 	// A List of country markers
 	private List<Marker> countryMarkers;
 	
+	private List<Marker> keyMarkers;
+	
 	// NEW IN MODULE 5
 	private CommonMarker lastSelected;
 	private CommonMarker lastClicked;
+	
+	private boolean foundMarker = false;
+	private boolean clickedCityMarker = false;
+	private boolean clickedEarthquakeMarker = false;
+	private boolean clickedCityKeyMarker = false;
+	private boolean clickedLandquakeKeyMarker = false;
+	private boolean clickedOceanquakeKeyMarker = false;
+	private boolean clickedShallowKeyMarker = false;
+	private boolean clickedIntermediateKeyMarker = false;
+	private boolean clickedDeepKeyMarker = false;
+	private boolean clickedPasthourKeyMarker = false;
+	
+	
+	private boolean allMarkersWereShown = true;
+	
+	
 	
 	public void setup() {		
 		// (1) Initializing canvas and map tiles
@@ -86,11 +106,11 @@ public class EarthquakeCityMap extends PApplet {
 		
 		// FOR TESTING: Set earthquakesURL to be one of the testing files by uncommenting
 		// one of the lines below.  This will work whether you are online or offline
-		//earthquakesURL = "test1.atom";
-		earthquakesURL = "test2.atom";
+//		earthquakesURL = "test1.atom";
+//		earthquakesURL = "test2.atom";
 		
 		// Uncomment this line to take the quiz
-		//earthquakesURL = "quiz2.atom";
+		earthquakesURL = "quiz2.atom";
 		
 		
 		// (2) Reading in earthquake data and geometric properties
@@ -109,18 +129,22 @@ public class EarthquakeCityMap extends PApplet {
 	    List<PointFeature> earthquakes = ParseFeed.parseEarthquake(this, earthquakesURL);
 	    quakeMarkers = new ArrayList<Marker>();
 	    earthquakeMarkers = new ArrayList<EarthquakeMarker>();
+	    landquakeMarkers = new ArrayList<LandQuakeMarker>();
+	    oceanquakeMarkers = new ArrayList<OceanQuakeMarker>();
 	    
 	    for(PointFeature feature : earthquakes) {
 		  //check if LandQuake
 		  if(isLand(feature)) {
 		    quakeMarkers.add(new LandQuakeMarker(feature));
 		    earthquakeMarkers.add(new LandQuakeMarker(feature));
+		    landquakeMarkers.add(new LandQuakeMarker(feature));
 		    
 		  }
 		  // OceanQuakes
 		  else {
 		    quakeMarkers.add(new OceanQuakeMarker(feature));
 		    earthquakeMarkers.add(new OceanQuakeMarker(feature));
+		    oceanquakeMarkers.add(new OceanQuakeMarker(feature));
 		  }
 	    }
 
@@ -133,7 +157,7 @@ public class EarthquakeCityMap extends PApplet {
 	    map.addMarkers(quakeMarkers);
 	    map.addMarkers(cityMarkers);
 	    
-	    sortAndPrint(20);
+	    sortAndPrint(100);
 	    
 	    
 	}  // End setup
@@ -143,6 +167,37 @@ public class EarthquakeCityMap extends PApplet {
 		background(0);
 		map.draw();
 		addKey();
+		
+		if(clickedCityKeyMarker) {
+			fill(0, 0, 0);
+			ellipse(45, 100, 3, 3);
+		}
+		if(clickedLandquakeKeyMarker) {
+			fill(0, 0, 0);
+			ellipse(45, 120, 3, 3);
+		}
+		if(clickedOceanquakeKeyMarker) {
+			fill(0, 0, 0);
+			ellipse(45, 140, 3, 3);
+		}
+		if(clickedShallowKeyMarker) {
+			fill(0, 0, 0);
+			ellipse(45, 190, 3, 3);
+		}
+		if(clickedIntermediateKeyMarker){
+			fill(0, 0, 0);
+			ellipse(45, 210, 3, 3);
+		}
+		if(clickedDeepKeyMarker) {
+			fill(0, 0, 0);
+			ellipse(45, 230, 3, 3);
+		}
+		if(clickedPasthourKeyMarker) {
+			fill(0, 0, 0);
+			ellipse(45, 250, 3, 3);
+		}
+		
+//		System.out.println("Mouse : "+mouseX+", "+mouseY);
 		
 	}
 	
@@ -206,28 +261,782 @@ public class EarthquakeCityMap extends PApplet {
 	@Override
 	public void mouseClicked()
 	{
-		if (lastClicked != null) {
-			unhideMarkers();
-			lastClicked = null;
-		}
-		else if (lastClicked == null) 
-		{
+		
+		if(!foundMarker) {
 			checkEarthquakesForClick();
-			if (lastClicked == null) {
-				checkCitiesForClick();
+		}
+		if(!foundMarker) {
+			checkCitiesForClick();
+		}
+		if(!foundMarker) {
+			cityKeyClicked();
+		}
+		if(!foundMarker) {
+			landquakeKeyClicked();		
+		}
+		if(!foundMarker) {
+			oceanquakeKeyClicked();
+		}
+		if(!foundMarker) {
+			shallowKeyClicked();
+		}
+		if(!foundMarker) {
+			intermediateKeyClicked();
+		}
+		if(!foundMarker) {
+			deepKeyClicked();
+		}
+		if(!foundMarker) {
+			pasthourKeyClicked();
+		}
+		if(!clickedCityKeyMarker && !clickedLandquakeKeyMarker && !clickedOceanquakeKeyMarker && !clickedShallowKeyMarker && !clickedIntermediateKeyMarker
+				&& !clickedDeepKeyMarker && !clickedPasthourKeyMarker) {
+			if(foundMarker && !clickedCityMarker && !clickedEarthquakeMarker) {
+				unhideMarkers();
 			}
 		}
+		
+		if(lastClicked != null && !foundMarker) {
+			unhideMarkers();
+			lastClicked = null;
+			allMarkersWereShown = true;
+			clickedCityMarker = false;
+			clickedEarthquakeMarker = false;
+			clickedCityKeyMarker = false;
+			clickedLandquakeKeyMarker = false;
+			clickedOceanquakeKeyMarker = false;
+			clickedShallowKeyMarker = false;
+			clickedIntermediateKeyMarker = false;
+			clickedDeepKeyMarker = false;
+			clickedPasthourKeyMarker = false;
+		}
+		foundMarker = false;
+		
+		
 	}
 	
+	private void pasthourKeyClicked() {
+		// TODO Auto-generated method stub
+		boolean hidden = false;
+		
+		boolean checkX;
+		boolean checkY;
+		if(mouseX >= 54 && mouseX <= 66) {
+			checkX = true;
+		}
+		else {
+			checkX =false;
+		}
+		
+		if(mouseY >= 244 && mouseY <= 256) {
+			checkY = true;
+		}
+		else {
+			checkY = false;
+		}
+		
+		if(checkX && checkY) {
+			System.out.println("Mouse click in PastHour Key is : "+mouseX+", "+mouseY);
+			if(clickedPasthourKeyMarker) {
+				clickedPasthourKeyMarker = false;
+				if(allMarkersWereShown) {
+					unhideMarkers();
+					foundMarker = true;
+					return;
+				}
+				else {
+					for(Marker m : quakeMarkers) {
+						EarthquakeMarker lnd = (EarthquakeMarker)m;
+						if(lnd.isMarkedX)
+						m.setHidden(true);
+					}
+					foundMarker = true;
+					return;
+				}
+				
+			}
+			
+			for(Marker m : quakeMarkers) {
+				EarthquakeMarker lnd = (EarthquakeMarker)m;
+				if(m.isHidden() && lnd.isMarkedX) {
+					if(clickedLandquakeKeyMarker && lnd.isOnLand) {
+						if(clickedShallowKeyMarker && lnd.isShallow) {
+							hidden = true;
+							m.setHidden(false);
+							lastClicked = (CommonMarker)m;
+						}
+						if(clickedIntermediateKeyMarker && lnd.isIntermediate) {
+							hidden = true;
+							m.setHidden(false);
+							lastClicked = (CommonMarker)m;
+						}
+						if(clickedDeepKeyMarker && lnd.isDeep) {
+							hidden = true;
+							m.setHidden(false);
+							lastClicked = (CommonMarker)m;
+						}
+						if(!clickedShallowKeyMarker && !clickedIntermediateKeyMarker && !clickedDeepKeyMarker) {
+							hidden = true;
+							m.setHidden(false);
+							lastClicked = (CommonMarker)m;
+						}
+					}
+					if(clickedOceanquakeKeyMarker && !lnd.isOnLand) {
+						if(clickedShallowKeyMarker && lnd.isShallow) {
+							hidden = true;
+							m.setHidden(false);
+							lastClicked = (CommonMarker)m;
+						}
+						if(clickedIntermediateKeyMarker && lnd.isIntermediate) {
+							hidden = true;
+							m.setHidden(false);
+							lastClicked = (CommonMarker)m;
+						}
+						if(clickedDeepKeyMarker && lnd.isDeep) {
+							hidden = true;
+							m.setHidden(false);
+							lastClicked = (CommonMarker)m;
+						}
+						if(!clickedShallowKeyMarker && !clickedIntermediateKeyMarker && !clickedDeepKeyMarker) {
+							hidden = true;
+							m.setHidden(false);
+							lastClicked = (CommonMarker)m;
+						}
+					}
+					if(!clickedOceanquakeKeyMarker && !clickedLandquakeKeyMarker) {
+						if(clickedShallowKeyMarker && lnd.isShallow) {
+							hidden = true;
+							m.setHidden(false);
+							lastClicked = (CommonMarker)m;
+						}
+						if(clickedIntermediateKeyMarker && lnd.isIntermediate) {
+							hidden = true;
+							m.setHidden(false);
+							lastClicked = (CommonMarker)m;
+						}
+						if(clickedDeepKeyMarker && lnd.isDeep) {
+							hidden = true;
+							m.setHidden(false);
+							lastClicked = (CommonMarker)m;
+						}
+						if(!clickedShallowKeyMarker && !clickedIntermediateKeyMarker && !clickedDeepKeyMarker) {
+							hidden = true;
+							m.setHidden(false);
+							lastClicked = (CommonMarker)m;
+						}
+					}	
+				}	
+			}
+			if(hidden) {
+				allMarkersWereShown = false;
+				clickedPasthourKeyMarker = true;
+				foundMarker = true;
+				return;
+			}
+			
+			if(!hidden) {
+				for(Marker m : cityMarkers) {
+					if(!clickedCityKeyMarker) {
+						m.setHidden(true);
+						lastClicked = (CommonMarker)m;
+					}	
+				}
+				for(Marker om : quakeMarkers) {
+					EarthquakeMarker em = (EarthquakeMarker)om;
+					if(!em.isMarkedX) {
+						om.setHidden(true);
+					}
+					if(em.isMarkedX) {
+						if(clickedLandquakeKeyMarker && !em.isOnLand && !clickedOceanquakeKeyMarker) {
+							if(clickedShallowKeyMarker && !em.isShallow) {
+								om.setHidden(true);
+							}
+							if(clickedIntermediateKeyMarker && !em.isIntermediate) {
+								om.setHidden(true);
+							}
+							if(clickedDeepKeyMarker && !em.isDeep) {
+								om.setHidden(true);
+							}
+							if(!clickedShallowKeyMarker && !clickedIntermediateKeyMarker && !clickedDeepKeyMarker) {
+								om.setHidden(true);
+							}
+							
+						}
+						else if(clickedOceanquakeKeyMarker && em.isOnLand && !clickedLandquakeKeyMarker) {
+							if(clickedShallowKeyMarker && !em.isShallow) {
+								om.setHidden(true);
+							}
+							if(clickedIntermediateKeyMarker && !em.isIntermediate) {
+								om.setHidden(true);
+							}
+							if(clickedDeepKeyMarker && !em.isDeep) {
+								om.setHidden(true);
+							}
+							if(!clickedShallowKeyMarker && !clickedIntermediateKeyMarker && !clickedDeepKeyMarker) {
+								om.setHidden(true);
+							}
+						}
+					}
+				}
+				clickedPasthourKeyMarker = true;
+				foundMarker = true;
+				allMarkersWereShown = true;
+				return;
+			}
+		}
+		
+	}
+
+
+	private void deepKeyClicked() {
+		// TODO Auto-generated method stub
+		boolean hidden = false;
+		
+		boolean checkX;
+		boolean checkY;
+		if(mouseX >= 54 && mouseX <= 66) {
+			checkX = true;
+		}
+		else {
+			checkX =false;
+		}
+		
+		if(mouseY >= 224 && mouseY <= 236) {
+			checkY = true;
+		}
+		else {
+			checkY = false;
+		}
+		
+		if(checkX && checkY) {
+			System.out.println("Mouse click in Deep Key is : "+mouseX+", "+mouseY);
+			if(clickedDeepKeyMarker) {
+				clickedDeepKeyMarker = false;
+				if(allMarkersWereShown) {
+					unhideMarkers();
+					foundMarker = true;
+					return;
+				}
+				else {
+					for(Marker m : quakeMarkers) {
+						EarthquakeMarker lnd = (EarthquakeMarker)m;
+						if(lnd.isDeep)
+						m.setHidden(true);
+					}
+					foundMarker = true;
+					return;
+				}
+				
+			}
+			
+			for(Marker m : quakeMarkers) {
+				EarthquakeMarker lnd = (EarthquakeMarker)m;
+				if(m.isHidden() && lnd.isDeep) {
+					if(!clickedLandquakeKeyMarker && !clickedOceanquakeKeyMarker) {
+						System.out.println("Shallow key pressed but no other one");
+						lastClicked = (CommonMarker)m;
+						m.setHidden(false);
+						hidden = true;
+					}
+					if(clickedLandquakeKeyMarker && lnd.isOnLand) {
+						lastClicked = (CommonMarker)m;
+						m.setHidden(false);
+						hidden = true;
+					}
+					if(clickedOceanquakeKeyMarker && !lnd.isOnLand) {
+						lastClicked = (CommonMarker)m;
+						m.setHidden(false);
+						hidden = true;
+					}
+				}	
+			}
+			if(hidden) {
+				allMarkersWereShown = false;
+				clickedDeepKeyMarker = true;
+				foundMarker = true;
+				return;
+			}
+			
+			if(!hidden) {
+				for(Marker m : cityMarkers) {
+					if(!clickedCityKeyMarker) {
+						m.setHidden(true);
+						lastClicked = (CommonMarker)m;
+					}
+					
+				}
+				for(Marker om : quakeMarkers) {
+					EarthquakeMarker em = (EarthquakeMarker)om;
+					if(!em.isDeep) {
+						om.setHidden(true);
+					}
+					if(em.isDeep) {
+						if(clickedLandquakeKeyMarker && !em.isOnLand && !clickedOceanquakeKeyMarker) {
+							om.setHidden(true);
+						}
+						else if(clickedOceanquakeKeyMarker && em.isOnLand && !clickedLandquakeKeyMarker) {
+							om.setHidden(true);
+						}
+					}
+				}
+				clickedDeepKeyMarker = true;
+				foundMarker = true;
+				allMarkersWereShown = true;
+				return;
+			}
+		}
+		
+	}
+
+
+	private void intermediateKeyClicked() {
+		// TODO Auto-generated method stub
+		boolean hidden = false;
+		
+		boolean checkX;
+		boolean checkY;
+		if(mouseX >= 54 && mouseX <= 66) {
+			checkX = true;
+		}
+		else {
+			checkX =false;
+		}
+		
+		if(mouseY >= 204 && mouseY <= 216) {
+			checkY = true;
+		}
+		else {
+			checkY = false;
+		}
+		
+		if(checkX && checkY) {
+			System.out.println("Mouse click in Intermediate Key is : "+mouseX+", "+mouseY);
+			if(clickedIntermediateKeyMarker) {
+				clickedIntermediateKeyMarker = false;
+				if(allMarkersWereShown) {
+					unhideMarkers();
+					foundMarker = true;
+					return;
+				}
+				else {
+					for(Marker m : quakeMarkers) {
+						EarthquakeMarker lnd = (EarthquakeMarker)m;
+						if(lnd.isIntermediate)
+						m.setHidden(true);
+					}
+					foundMarker = true;
+					return;
+				}
+				
+			}
+			
+			for(Marker m : quakeMarkers) {
+				EarthquakeMarker lnd = (EarthquakeMarker)m;
+				if(m.isHidden() && lnd.isIntermediate) {
+					if(!clickedLandquakeKeyMarker && !clickedOceanquakeKeyMarker) {
+						System.out.println("Intermediate key pressed but no other one");
+						lastClicked = (CommonMarker)m;
+						m.setHidden(false);
+						hidden = true;
+					}
+					if(clickedLandquakeKeyMarker && lnd.isOnLand) {
+						lastClicked = (CommonMarker)m;
+						m.setHidden(false);
+						hidden = true;
+					}
+					if(clickedOceanquakeKeyMarker && !lnd.isOnLand) {
+						lastClicked = (CommonMarker)m;
+						m.setHidden(false);
+						hidden = true;
+					}
+				}	
+			}
+			if(hidden) {
+				allMarkersWereShown = false;
+				clickedIntermediateKeyMarker = true;
+				foundMarker = true;
+				return;
+			}
+			
+			if(!hidden) {
+				for(Marker m : cityMarkers) {
+					if(!clickedCityKeyMarker) {
+						m.setHidden(true);
+						lastClicked = (CommonMarker)m;
+					}
+					
+				}
+				for(Marker om : quakeMarkers) {
+					EarthquakeMarker em = (EarthquakeMarker)om;
+					if(!em.isIntermediate) {
+						om.setHidden(true);
+					}
+					if(em.isIntermediate) {
+						if(clickedLandquakeKeyMarker && !em.isOnLand && !clickedOceanquakeKeyMarker) {
+							om.setHidden(true);
+						}
+						else if(clickedOceanquakeKeyMarker && em.isOnLand && !clickedLandquakeKeyMarker) {
+							om.setHidden(true);
+						}
+					}
+				}
+				clickedIntermediateKeyMarker = true;
+				foundMarker = true;
+				allMarkersWereShown = true;
+				
+				return;
+			}
+		}
+		
+	}
+
+
+	private void shallowKeyClicked() {
+		// TODO Auto-generated method stub
+		
+		boolean hidden = false;
+		
+		boolean checkX;
+		boolean checkY;
+		if(mouseX >= 54 && mouseX <= 66) {
+			checkX = true;
+		}
+		else {
+			checkX =false;
+		}
+		
+		if(mouseY >= 184 && mouseY <= 196) {
+			checkY = true;
+		}
+		else {
+			checkY = false;
+		}
+		
+		if(checkX && checkY) {
+			System.out.println("Mouse click in Shallowquake Key is : "+mouseX+", "+mouseY);
+			if(clickedShallowKeyMarker) {
+				clickedShallowKeyMarker = false;
+				if(allMarkersWereShown) {
+					unhideMarkers();
+					foundMarker = true;
+					return;
+				}
+				else {
+					for(Marker m : quakeMarkers) {
+						EarthquakeMarker lnd = (EarthquakeMarker)m;
+						if(lnd.isShallow)
+						m.setHidden(true);
+					}
+					foundMarker = true;
+					return;
+				}
+				
+			}
+			
+			for(Marker m : quakeMarkers) {
+				EarthquakeMarker lnd = (EarthquakeMarker)m;
+				
+				if(m.isHidden() && lnd.isShallow) {
+					if(!clickedLandquakeKeyMarker && !clickedOceanquakeKeyMarker) {
+						System.out.println("Shallow key pressed but no other one");
+						lastClicked = (CommonMarker)m;
+						m.setHidden(false);
+						hidden = true;
+					}
+					if(clickedLandquakeKeyMarker && lnd.isOnLand) {
+						lastClicked = (CommonMarker)m;
+						m.setHidden(false);
+						hidden = true;
+					}
+					if(clickedOceanquakeKeyMarker && !lnd.isOnLand) {
+						lastClicked = (CommonMarker)m;
+						m.setHidden(false);
+						hidden = true;
+					}
+				}
+			}
+				
+			if(hidden) {
+				allMarkersWereShown = false;
+				clickedShallowKeyMarker = true;
+				foundMarker = true;
+				return;
+			}
+			
+			if(!hidden) {
+				for(Marker m : cityMarkers) {
+					if(!clickedCityKeyMarker) {
+						m.setHidden(true);
+						lastClicked = (CommonMarker)m;
+					}
+					
+				}
+				for(Marker om : quakeMarkers) {
+					EarthquakeMarker em = (EarthquakeMarker)om;
+					if(!em.isShallow) {
+						om.setHidden(true);
+					}
+					if(em.isShallow) {
+						if(clickedLandquakeKeyMarker && !em.isOnLand && !clickedOceanquakeKeyMarker) {
+							om.setHidden(true);
+						}
+						else if(clickedOceanquakeKeyMarker && em.isOnLand && !clickedLandquakeKeyMarker) {
+							om.setHidden(true);
+						}
+					}
+				}
+				clickedShallowKeyMarker = true;
+				foundMarker = true;
+				allMarkersWereShown = true;
+				
+				return;
+			}
+		}
+		
+		
+	}
+
+
+	private void oceanquakeKeyClicked() {
+		// TODO Auto-generated method stub
+		boolean hidden = false;
+		
+		boolean checkX;
+		boolean checkY;
+		if(mouseX >= 55 && mouseX <= 65) {
+			checkX = true;
+		}
+		else {
+			checkX =false;
+		}
+		
+		if(mouseY >= 135 && mouseY <= 145) {
+			checkY = true;
+		}
+		else {
+			checkY = false;
+		}
+		
+		if(checkX && checkY) {
+			System.out.println("Mouse click in Oceanquake Key is : "+mouseX+", "+mouseY);
+			if(clickedOceanquakeKeyMarker) {
+				clickedOceanquakeKeyMarker = false;
+				if(allMarkersWereShown) {
+					unhideMarkers();
+					foundMarker = true;
+					return;
+				}
+				else {
+					for(Marker m : quakeMarkers) {
+						EarthquakeMarker lnd = (EarthquakeMarker)m;
+						if(!lnd.isOnLand)
+						m.setHidden(true);
+					}
+					foundMarker = true;
+					return;
+				}
+				
+			}
+			
+			for(Marker m : quakeMarkers) {
+				EarthquakeMarker lnd = (EarthquakeMarker)m;
+				if(m.isHidden() && !lnd.isOnLand) {
+					hidden = true;
+					m.setHidden(false);
+					lastClicked = (CommonMarker)m;
+					
+				}	
+			}
+			if(hidden) {
+				allMarkersWereShown = false;
+				clickedOceanquakeKeyMarker = true;
+				foundMarker = true;
+				return;
+			}
+			
+			if(!hidden) {
+				for(Marker m : cityMarkers) {
+					m.setHidden(true);
+					lastClicked = (CommonMarker)m;
+				}
+				for(Marker om : quakeMarkers) {
+					EarthquakeMarker em = (EarthquakeMarker)om;
+					if(em.isOnLand) {
+						om.setHidden(true);
+					}
+				}
+				clickedOceanquakeKeyMarker = true;
+				foundMarker = true;
+				allMarkersWereShown = true;
+				return;
+			}
+		}
+		
+	}
+
+
+	private void landquakeKeyClicked() {
+		// TODO Auto-generated method stub
+		boolean hidden = false;
+		
+		boolean checkX;
+		boolean checkY;
+		if(mouseX >= 55 && mouseX <= 65) {
+			checkX = true;
+		}
+		else {
+			checkX =false;
+		}
+		
+		if(mouseY >= 110 && mouseY <= 130) {
+			checkY = true;
+		}
+		else {
+			checkY = false;
+		}
+		
+		if(checkX && checkY) {
+			System.out.println("Mouse click in Landquake Key is : "+mouseX+", "+mouseY);
+			if(clickedLandquakeKeyMarker) {
+				clickedLandquakeKeyMarker = false;
+				if(allMarkersWereShown) {
+					unhideMarkers();
+					foundMarker = true;
+					return;
+				}
+				else {
+					for(Marker m : quakeMarkers) {
+						EarthquakeMarker lnd = (EarthquakeMarker)m;
+						if(lnd.isOnLand)
+						m.setHidden(true);
+					}
+					foundMarker = true;
+					return;
+				}
+				
+			}
+			
+			for(Marker m : quakeMarkers) {
+				EarthquakeMarker lnd = (EarthquakeMarker)m;
+				if(m.isHidden() && lnd.isOnLand) {
+					hidden = true;
+					m.setHidden(false);
+					lastClicked = (CommonMarker)m;
+					
+				}	
+			}
+			if(hidden) {
+				allMarkersWereShown = false;
+				clickedLandquakeKeyMarker = true;
+				foundMarker = true;
+				return;
+			}
+			
+			if(!hidden) {
+				for(Marker m : cityMarkers) {
+					m.setHidden(true);
+					lastClicked = (CommonMarker)m;
+				}
+				for(Marker om : quakeMarkers) {
+					EarthquakeMarker em = (EarthquakeMarker)om;
+					if(!em.isOnLand) {
+						om.setHidden(true);
+					}
+				}
+				clickedLandquakeKeyMarker = true;
+				foundMarker = true;
+				allMarkersWereShown = true;
+				return;
+			}
+		}
+		
+	}
+
+
+	private void cityKeyClicked() {
+		// TODO Auto-generated method stub
+		boolean hidden = false;
+		
+		boolean checkX;
+		boolean checkY;
+		if(mouseX >= 55 && mouseX <= 65) {
+			checkX = true;
+		}
+		else {
+			checkX =false;
+		}
+		
+		if(mouseY >= 95 && mouseY <= 105) {
+			checkY = true;
+		}
+		else {
+			checkY = false;
+		}
+		
+		if(checkX && checkY) {
+			System.out.println("Mouse click in City Key is : "+mouseX+", "+mouseY);
+			if(clickedCityKeyMarker) {
+				clickedCityKeyMarker = false;
+				if(allMarkersWereShown) {
+					unhideMarkers();
+					foundMarker = true;
+					return;
+				}
+				else {
+					for(Marker m : cityMarkers) {
+						m.setHidden(true);
+					}
+					foundMarker = true;
+					return;
+				}
+				
+			}
+			
+			for(Marker m : cityMarkers) {
+				if(m.isHidden()) {
+					hidden = true;
+					m.setHidden(false);
+					lastClicked = (CommonMarker)m;
+					
+				}	
+			}
+			if(hidden) {
+				allMarkersWereShown = false;
+				clickedCityKeyMarker = true;
+				foundMarker = true;
+				return;
+			}
+			
+			if(!hidden) {
+				for(Marker m : quakeMarkers) {
+					m.setHidden(true);
+					lastClicked = (CommonMarker)m;
+				}
+				clickedCityKeyMarker = true;
+				foundMarker = true;
+				allMarkersWereShown = true;
+				return;
+			}
+		}
+		
+	}
+
+
 	// Helper method that will check if a city marker was clicked on
 	// and respond appropriately
 	private void checkCitiesForClick()
 	{
-		if (lastClicked != null) return;
+		
 		// Loop over the earthquake markers to see if one of them is selected
 		for (Marker marker : cityMarkers) {
 			if (!marker.isHidden() && marker.isInside(map, mouseX, mouseY)) {
 				lastClicked = (CommonMarker)marker;
+				if(clickedCityMarker) {
+					foundMarker = true;
+					clickedCityMarker = false;
+					unhideMarkers();
+					return;
+				}
 				// Hide all the other earthquakes and hide
 				for (Marker mhide : cityMarkers) {
 					if (mhide != lastClicked) {
@@ -241,6 +1050,8 @@ public class EarthquakeCityMap extends PApplet {
 						quakeMarker.setHidden(true);
 					}
 				}
+				foundMarker = true;
+				clickedCityMarker = true;
 				return;
 			}
 		}		
@@ -250,12 +1061,18 @@ public class EarthquakeCityMap extends PApplet {
 	// and respond appropriately
 	private void checkEarthquakesForClick()
 	{
-		if (lastClicked != null) return;
+		
 		// Loop over the earthquake markers to see if one of them is selected
 		for (Marker m : quakeMarkers) {
 			EarthquakeMarker marker = (EarthquakeMarker)m;
 			if (!marker.isHidden() && marker.isInside(map, mouseX, mouseY)) {
 				lastClicked = marker;
+				if(clickedEarthquakeMarker) {
+					foundMarker = true;
+					clickedEarthquakeMarker = false;
+					unhideMarkers();
+					return;
+				}
 				// Hide all the other earthquakes and hide
 				for (Marker mhide : quakeMarkers) {
 					if (mhide != lastClicked) {
@@ -268,6 +1085,8 @@ public class EarthquakeCityMap extends PApplet {
 						mhide.setHidden(true);
 					}
 				}
+				clickedEarthquakeMarker = true;
+				foundMarker = true;
 				return;
 			}
 		}

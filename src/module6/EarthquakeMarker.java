@@ -19,6 +19,10 @@ public abstract class EarthquakeMarker extends CommonMarker implements java.lang
 	
 	// Did the earthquake occur on land?  This will be set by the subclasses.
 	protected boolean isOnLand;
+	protected boolean isShallow;
+	protected boolean isIntermediate;
+	protected boolean isDeep;
+	protected boolean isMarkedX;
 
 	// The radius of the Earthquake marker
 	// You will want to set this in the constructor, either
@@ -57,6 +61,7 @@ public abstract class EarthquakeMarker extends CommonMarker implements java.lang
 		properties.put("radius", 2*magnitude );
 		setProperties(properties);
 		this.radius = 1.75f*getMagnitude();
+		calcualteDepthAndX();
 	}
 	
 	// TODO: Add the method:
@@ -166,6 +171,36 @@ public abstract class EarthquakeMarker extends CommonMarker implements java.lang
 		else {
 			pg.fill(255, 0, 0);
 		}
+	}
+	
+	private void calcualteDepthAndX() {
+		float depth = getDepth();
+		
+		if (depth < THRESHOLD_INTERMEDIATE) {
+			this.isShallow = true;
+			this.isDeep = false;
+			this.isIntermediate = false;
+		}
+		else if (depth < THRESHOLD_DEEP) {
+			this.isIntermediate = true;
+			this.isDeep = false;
+			this.isShallow = false;
+		}
+		else {
+			this.isDeep = true;
+			this.isIntermediate = false;
+			this.isShallow = false;
+		}
+		
+		String age = getStringProperty("age");
+		if ("Past Hour".equals(age) || "Past Day".equals(age)) {
+			this.isMarkedX = true;
+		}
+		else {
+			this.isMarkedX = false;
+		}
+		
+		
 	}
 	
 	

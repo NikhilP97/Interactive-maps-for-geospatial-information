@@ -1,6 +1,6 @@
 # Interactive maps for  geospatial information
 
-After already having some experience in Java I thought it would be good if i could brush up on my fundamentals and also get a bit of insight as to how Ojects work because i soon realized that although Java is Object Oriented i may still be using procedural programming. Hence i opted for this course on Coursera and this perfectly suited my need as it is an Intermediate course on Java though they do brush up on basics. 
+After already having some experience in Java I thought it would be good if i could brush up on my fundamentals and also get a bit of insight as to how Objects work because i soon realized that although Java is Object Oriented i may still be using procedural programming. Hence i opted for this course on Coursera and this perfectly suited my need as it is an Intermediate course on Java though they do brush up on basics. 
 
 To create this project, I'll be working with a package called Unfolding Maps, which is a library for interactive maps and geovisualizations. It was developed by Till Nagel and the team at the University of Applied Sciences Potsdam along with other contributors.The project is separated into several parts, and there are project milestones as you work through the modules in the course.
 
